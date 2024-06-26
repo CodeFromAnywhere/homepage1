@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Myelin Knowledge Search</title>
+    <style>
+        body {
+            background-color: black;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+
+        #searchContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        #myelinText {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(0, 123, 255, 0.7),
+                0 0 20px rgba(0, 123, 255, 0.5),
+                0 0 30px rgba(0, 123, 255, 0.3);
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid white;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        #buttonContainer {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .searchButton {
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid white;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .searchButton:hover,
+        .searchButton.selected {
+            box-shadow: 0 0 10px 3px rgba(0, 123, 255, 0.7);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="searchContainer">
+        <div id="myelinText">myelin</div>
+        <input type="text" id="knowledgeInput" placeholder="where knowledge begins" autofocus>
+        <div id="buttonContainer">
+            <button class="searchButton" data-url="https://chatgpt.com/?q=%s">ChatGPT</button>
+            <button class="searchButton" data-url="https://exa.ai/search?q=%s">Exa</button>
+            <button class="searchButton" data-url="https://www.perplexity.ai/search?q=%s">Perplexity</button>
+            <button class="searchButton" data-url="https://www.google.com/search?q=%s">Google</button>
+        </div>
+    </div>
+
+    <script>
+        const input = document.getElementById('knowledgeInput');
+        const buttons = document.querySelectorAll('.searchButton');
+        let selectedIndex = 0;
+
+        function updateSelectedButton() {
+            buttons.forEach((btn, index) => {
+                btn.classList.toggle('selected', index === selectedIndex);
+            });
+        }
+
+        function search() {
+            const query = encodeURIComponent(input.value);
+            const url = buttons[selectedIndex].dataset.url.replace('%s', query);
+            window.location.href = url;
+        }
+
+        function focusInput() {
+            // Delay focus to work around Safari's behavior
+            setTimeout(() => {
+                input.focus();
+                // Move cursor to end of input
+                input.setSelectionRange(input.value.length, input.value.length);
+            }, 100);
+        }
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                search();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedIndex = (selectedIndex - 1 + buttons.length) % buttons.length;
+                updateSelectedButton();
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedIndex = (selectedIndex + 1) % buttons.length;
+                updateSelectedButton();
+            }
+        });
+
+        buttons.forEach((btn, index) => {
+            btn.addEventListener('click', () => {
+                selectedIndex = index;
+                updateSelectedButton();
+                search();
+            });
+        });
+
+        // Focus input on page load
+        window.onload = focusInput;
+
+        // Re-focus input when window gains focus
+        window.onfocus = focusInput;
+
+        // Attempt to refocus input periodically
+        setInterval(focusInput, 1000);
+
+        // Attempt to refocus when user interacts with the page
+        document.body.addEventListener('click', focusInput);
+        document.body.addEventListener('touchstart', focusInput);
+    </script>
+</body>
+
+</html>
