@@ -77,12 +77,15 @@
         }
 
         #settingsButton,
-        #homepageButton {
-            position: absolute;
+        #homepageButton,
+        #sourceCodeButton,
+        #twitterButton {
+            position: fixed;
             background: none;
             border: none;
             color: white;
             cursor: pointer;
+            font-size: 24px;
         }
 
         #settingsButton {
@@ -93,6 +96,16 @@
         #homepageButton {
             top: 10px;
             left: 10px;
+        }
+
+        #sourceCodeButton {
+            bottom: 10px;
+            left: 10px;
+        }
+
+        #twitterButton {
+            bottom: 10px;
+            right: 10px;
         }
 
         #settingsForm,
@@ -128,6 +141,8 @@
     </div>
     <button id="settingsButton">⚙️</button>
     <button id="homepageButton">🏠</button>
+    <button id="sourceCodeButton">👨‍💻</button>
+    <button id="twitterButton">🐦</button>
     <div id="settingsForm">
         <textarea id="settingsTextarea" placeholder="title:url&#10;title2:url2"></textarea>
         <button id="saveSettings">Save</button>
@@ -168,6 +183,8 @@
         const closeHomepageInstructions = document.getElementById('closeHomepageInstructions');
         const currentUrlInput = document.getElementById('currentUrl');
         const searchUrlInput = document.getElementById('searchUrl');
+        const sourceCodeButton = document.getElementById('sourceCodeButton');
+        const twitterButton = document.getElementById('twitterButton');
 
         let selectedIndex = parseInt(localStorage.getItem('selectedIndex') || '0');
 
@@ -260,12 +277,20 @@ Google:https://www.google.com/search?q=%s`;
 
         homepageButton.addEventListener('click', () => {
             currentUrlInput.value = window.location.href;
-            searchUrlInput.value = window.location.href + 'search?q=%s';
+            searchUrlInput.value = window.location.href + '?q=%s';
             homepageInstructions.style.display = 'block';
         });
 
         closeHomepageInstructions.addEventListener('click', () => {
             homepageInstructions.style.display = 'none';
+        });
+
+        sourceCodeButton.addEventListener('click', () => {
+            window.location.href = '/_src';
+        });
+
+        twitterButton.addEventListener('click', () => {
+            window.open('https://x.com/wkarsens', '_blank');
         });
 
         window.onload = () => {
