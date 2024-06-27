@@ -20,19 +20,18 @@ export const GET = async (request: Request) => {
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o",
 
       messages: [
         {
           role: "system",
-          content: `You are a AI redirect engine. You redirect the user to the right search engine.
+          content: `You are a AI redirect engine. You redirect the user to the right search engine, depending on the query. For open questions, use ChatGPT. For news questions, use perplexity. For similarity questions, use Exa. All else, use Google.
 
 The possibilities are as follows:
 
 ${config}
 
 The user search query: ${q}
-
 
 Respond with a JSON object {"url":"The redirect url"}.`,
         },
