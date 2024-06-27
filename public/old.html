@@ -76,27 +76,17 @@
             box-shadow: 0 0 15px 5px rgba(0, 123, 255, 0.9);
         }
 
-        #settingsButton,
-        #homepageButton {
+        #settingsButton {
             position: absolute;
+            top: 10px;
+            right: 10px;
             background: none;
             border: none;
             color: white;
             cursor: pointer;
         }
 
-        #settingsButton {
-            top: 10px;
-            right: 10px;
-        }
-
-        #homepageButton {
-            top: 10px;
-            left: 10px;
-        }
-
-        #settingsForm,
-        #homepageInstructions {
+        #settingsForm {
             display: none;
             position: fixed;
             top: 50%;
@@ -112,11 +102,6 @@
             width: 300px;
             height: 200px;
         }
-
-        #homepageInstructions {
-            max-width: 80%;
-            text-align: left;
-        }
     </style>
 </head>
 
@@ -127,32 +112,10 @@
         <div id="buttonContainer"></div>
     </div>
     <button id="settingsButton">⚙️</button>
-    <button id="homepageButton">🏠</button>
     <div id="settingsForm">
         <textarea id="settingsTextarea" placeholder="title:url&#10;title2:url2"></textarea>
         <button id="saveSettings">Save</button>
         <button id="closeSettings">Close</button>
-    </div>
-    <div id="homepageInstructions">
-        <h2>Set as Homepage</h2>
-        <p>To set this page as your homepage:</p>
-        <ol>
-            <li>Copy this URL: <input type="text" id="currentUrl" readonly></li>
-            <li>Open your browser settings</li>
-            <li>Find the "On startup" or "Homepage" section</li>
-            <li>Paste the URL and save the changes</li>
-        </ol>
-        <h2>Set as Default Search Engine</h2>
-        <p>To set this as your default search engine:</p>
-        <ol>
-            <li>Open your browser settings</li>
-            <li>Find the "Search engine" section</li>
-            <li>Choose "Add search engine"</li>
-            <li>Use this URL: <input type="text" id="searchUrl" readonly></li>
-            <li>Set a name (e.g., "Custom Search")</li>
-            <li>Save and select as default</li>
-        </ol>
-        <button id="closeHomepageInstructions">Close</button>
     </div>
 
     <script>
@@ -163,11 +126,6 @@
         const settingsTextarea = document.getElementById('settingsTextarea');
         const saveSettingsButton = document.getElementById('saveSettings');
         const closeSettingsButton = document.getElementById('closeSettings');
-        const homepageButton = document.getElementById('homepageButton');
-        const homepageInstructions = document.getElementById('homepageInstructions');
-        const closeHomepageInstructions = document.getElementById('closeHomepageInstructions');
-        const currentUrlInput = document.getElementById('currentUrl');
-        const searchUrlInput = document.getElementById('searchUrl');
 
         let selectedIndex = parseInt(localStorage.getItem('selectedIndex') || '0');
 
@@ -258,22 +216,16 @@ Google:https://www.google.com/search?q=%s`;
             settingsForm.style.display = 'none';
         });
 
-        homepageButton.addEventListener('click', () => {
-            currentUrlInput.value = window.location.href;
-            searchUrlInput.value = window.location.href + 'search?q=%s';
-            homepageInstructions.style.display = 'block';
-        });
-
-        closeHomepageInstructions.addEventListener('click', () => {
-            homepageInstructions.style.display = 'none';
-        });
-
         window.onload = () => {
             createButtons();
             focusInput();
         };
         window.onfocus = focusInput;
+        //setInterval(focusInput, 1000);
+        //document.body.addEventListener('click', focusInput);
+        //document.body.addEventListener('touchstart', focusInput);
     </script>
 </body>
 
 </html>
+<!-- powered by Code From Anywhere -->
