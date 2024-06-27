@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Myelin Knowledge Search</title>
+    <title>Search</title>
     <style>
         body {
             background-color: black;
@@ -26,16 +26,17 @@
             max-width: 600px;
         }
 
-        #myelinText {
+        #searchText {
             font-size: 48px;
             font-weight: bold;
             margin-bottom: 20px;
-            text-shadow: 0 0 10px rgba(0, 123, 255, 0.7),
-                0 0 20px rgba(0, 123, 255, 0.5),
-                0 0 30px rgba(0, 123, 255, 0.3);
+            text-shadow: 0 0 15px rgba(0, 123, 255, 0.9),
+                0 0 30px rgba(0, 123, 255, 0.7),
+                0 0 45px rgba(0, 123, 255, 0.5);
         }
 
-        input {
+        input,
+        textarea {
             width: 100%;
             padding: 15px;
             font-size: 18px;
@@ -46,7 +47,8 @@
             margin-bottom: 20px;
         }
 
-        input::placeholder {
+        input::placeholder,
+        textarea::placeholder {
             color: rgba(255, 255, 255, 0.7);
         }
 
@@ -54,6 +56,7 @@
             display: flex;
             justify-content: space-between;
             width: 100%;
+            flex-wrap: wrap;
         }
 
         .searchButton {
@@ -65,49 +68,118 @@
             color: white;
             cursor: pointer;
             transition: box-shadow 0.3s ease;
+            margin: 5px;
         }
 
         .searchButton:hover,
         .searchButton.selected {
-            box-shadow: 0 0 10px 3px rgba(0, 123, 255, 0.7);
+            box-shadow: 0 0 15px 5px rgba(0, 123, 255, 0.9);
+        }
+
+        #settingsButton {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+        #settingsForm {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1000;
+        }
+
+        #settingsForm textarea {
+            width: 300px;
+            height: 200px;
         }
     </style>
 </head>
 
 <body>
     <div id="searchContainer">
-        <div id="myelinText">myelin</div>
+        <div id="searchText">Search</div>
         <input type="text" id="knowledgeInput" placeholder="where knowledge begins" autofocus>
-        <div id="buttonContainer">
-            <button class="searchButton" data-url="https://chatgpt.com/?q=%s">ChatGPT</button>
-            <button class="searchButton" data-url="https://exa.ai/search?q=%s">Exa</button>
-            <button class="searchButton" data-url="https://www.perplexity.ai/search?q=%s">Perplexity</button>
-            <button class="searchButton" data-url="https://www.google.com/search?q=%s">Google</button>
-        </div>
+        <div id="buttonContainer"></div>
+    </div>
+    <button id="settingsButton">⚙️</button>
+    <div id="settingsForm">
+        <textarea id="settingsTextarea" placeholder="title:url&#10;title2:url2"></textarea>
+        <button id="saveSettings">Save</button>
+        <button id="closeSettings">Close</button>
     </div>
 
     <script>
         const input = document.getElementById('knowledgeInput');
-        const buttons = document.querySelectorAll('.searchButton');
-        let selectedIndex = 0;
+        const buttonContainer = document.getElementById('buttonContainer');
+        const settingsButton = document.getElementById('settingsButton');
+        const settingsForm = document.getElementById('settingsForm');
+        const settingsTextarea = document.getElementById('settingsTextarea');
+        const saveSettingsButton = document.getElementById('saveSettings');
+        const closeSettingsButton = document.getElementById('closeSettings');
+
+        let selectedIndex = parseInt(localStorage.getItem('selectedIndex') || '0');
+
+        function getSearchEngines() {
+            const defaultEngines = `ChatGPT:https://chatgpt.com/?q=%s
+Exa:https://exa.ai/search?q=%s
+Perplexity:https://www.perplexity.ai/search?q=%s
+Google:https://www.google.com/search?q=%s`;
+            return localStorage.getItem('searchEngines') || defaultEngines;
+        }
+
+        function saveSearchEngines(engines) {
+            localStorage.setItem('searchEngines', engines);
+        }
+
+        function createButtons() {
+            buttonContainer.innerHTML = '';
+            const engines = getSearchEngines().split('\n');
+            engines.forEach((engine, index) => {
+                const [title, ...urlChunks] = engine.split(':');
+                const url = urlChunks.join(":")
+                const button = document.createElement('button');
+                button.textContent = title;
+                button.className = 'searchButton';
+                button.dataset.url = url;
+                button.addEventListener('click', () => {
+                    selectedIndex = index;
+                    localStorage.setItem('selectedIndex', selectedIndex);
+                    updateSelectedButton();
+                    search();
+                });
+                buttonContainer.appendChild(button);
+            });
+            updateSelectedButton();
+        }
 
         function updateSelectedButton() {
-            buttons.forEach((btn, index) => {
+            document.querySelectorAll('.searchButton').forEach((btn, index) => {
                 btn.classList.toggle('selected', index === selectedIndex);
             });
         }
 
         function search() {
             const query = encodeURIComponent(input.value);
-            const url = buttons[selectedIndex].dataset.url.replace('%s', query);
-            window.location.href = url;
+            const selectedButton = document.querySelectorAll('.searchButton')[selectedIndex];
+            if (selectedButton) {
+                const url = selectedButton.dataset.url.replace('%s', query);
+                window.location.href = url;
+            }
         }
 
         function focusInput() {
-            // Delay focus to work around Safari's behavior
             setTimeout(() => {
                 input.focus();
-                // Move cursor to end of input
                 input.setSelectionRange(input.value.length, input.value.length);
             }, 100);
         }
@@ -117,35 +189,40 @@
                 search();
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
-                selectedIndex = (selectedIndex - 1 + buttons.length) % buttons.length;
+                selectedIndex = (selectedIndex - 1 + buttonContainer.children.length) % buttonContainer.children.length;
+                localStorage.setItem('selectedIndex', selectedIndex);
                 updateSelectedButton();
             } else if (e.key === 'ArrowDown') {
                 e.preventDefault();
-                selectedIndex = (selectedIndex + 1) % buttons.length;
+                selectedIndex = (selectedIndex + 1) % buttonContainer.children.length;
+                localStorage.setItem('selectedIndex', selectedIndex);
                 updateSelectedButton();
             }
         });
 
-        buttons.forEach((btn, index) => {
-            btn.addEventListener('click', () => {
-                selectedIndex = index;
-                updateSelectedButton();
-                search();
-            });
+        settingsButton.addEventListener('click', () => {
+            settingsTextarea.value = getSearchEngines();
+            settingsForm.style.display = 'block';
         });
 
-        // Focus input on page load
-        window.onload = focusInput;
+        saveSettingsButton.addEventListener('click', () => {
+            saveSearchEngines(settingsTextarea.value);
+            createButtons();
+            settingsForm.style.display = 'none';
+        });
 
-        // Re-focus input when window gains focus
+        closeSettingsButton.addEventListener('click', () => {
+            settingsForm.style.display = 'none';
+        });
+
+        window.onload = () => {
+            createButtons();
+            focusInput();
+        };
         window.onfocus = focusInput;
-
-        // Attempt to refocus input periodically
-        setInterval(focusInput, 1000);
-
-        // Attempt to refocus when user interacts with the page
-        document.body.addEventListener('click', focusInput);
-        document.body.addEventListener('touchstart', focusInput);
+        //setInterval(focusInput, 1000);
+        //document.body.addEventListener('click', focusInput);
+        //document.body.addEventListener('touchstart', focusInput);
     </script>
 </body>
 
