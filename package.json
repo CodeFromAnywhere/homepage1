@@ -9,5 +9,8 @@
   "devDependencies": {
     "@types/node": "^20.14.7",
     "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "openai": "^4.52.1"
   }
 }

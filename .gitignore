@@ -5,3 +5,4 @@ package-lock.json
 test
 .env.local
 TODO.md
+.env
